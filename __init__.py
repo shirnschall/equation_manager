@@ -1,0 +1,1 @@
+from .equation_manager import Equation_Manager
