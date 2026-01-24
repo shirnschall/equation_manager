@@ -1,0 +1,16 @@
+sympy
+numpy
+notebook
+IPython
+sphinx 
+sphinx-rtd-theme 
+sphinx-autodoc-typehints 
+myst-parser
+sphinx-copybutton 
+sphinx-design 
+sphinxcontrib-mermaid
+sphinx-pyreverse
+pathlib
+sphinxawesome-theme
+furo
+plotly
