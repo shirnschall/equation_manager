@@ -21,7 +21,7 @@ Features:
 """
 
 from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
-import numpy as np
+# import numpy as np
 from copy import deepcopy
 from functools import reduce
 import re
