@@ -22,14 +22,36 @@ Features:
 
 from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
 import numpy as np
-import plotly.graph_objects as go
 from copy import deepcopy
 from functools import reduce
-from IPython.display import Math, Latex, display, Markdown
 import re
 from collections import defaultdict
 from itertools import combinations
 
+def in_jupyter():
+    try:
+        # Most common & reliable way (works in classic notebook, JupyterLab, Colab, VSCode notebooks...)
+        from IPython import get_ipython
+        ipy = get_ipython()
+        if ipy is None:
+            return False
+        # Check if we're in an interactive backend that supports rich display
+        shell = ipy.__class__.__name__
+        return 'Terminal' not in shell and 'Interactive' in shell or 'ZMQ' in shell
+    except ImportError:
+        return False
+    
+if in_jupyter():
+    from IPython.display import Math, Latex, display, Markdown
+    import plotly.graph_objects as go
+    
+    # Optional: you can also set plotly to notebook mode here if desired
+    # import plotly.io as pio
+    # pio.renderers.default = 'notebook'   # or 'jupyterlab', 'colab', etc.
+    
+    print("Jupyter environment detected → rich display & plotly imported")
+else:
+    print("Not in Jupyter → skipping IPython & plotly imports")
 
 class Equation_Template:
     """Container for a single equation template used by :class:`Equation_Manager`.
@@ -404,7 +426,7 @@ class Equation_Manager:
 
         print("Solving... ", end="")
 
-        self._pretty_print_eqns("Matching Equations", self.equation_names, self.equations)
+        # self._pretty_print_eqns("Matching Equations", self.equation_names, self.equations)
 
         solutions, eqs_used, names_used = self._solve(assumptions, looking_for)
 
@@ -418,4 +440,4 @@ class Equation_Manager:
                 self._pretty_print_eqns("Equations actually used:", names_used, eqs_used)
                 self._pretty_print_sol(solutions[0], looking_for)
 
-        return solutions, self.equations
+        return solutions, eqs_used, names_used

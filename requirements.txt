@@ -14,4 +14,3 @@ pathlib
 sphinxawesome-theme
 furo
 plotly
-micropip
