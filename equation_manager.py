@@ -298,6 +298,59 @@ class Equation_Manager:
                     s_ind += m.end()
                     self._add_vars([(m.group()[:-len(m.group(1))], "")], int(m.group(1)))
 
+    def ngapp_vars(self):
+        return_sting = ""
+
+        return_sting += r"\(\text{\textbf{Variables:}}\\\\\)"
+
+        all_vars = {}
+        for tmpl in self.equation_templates:
+            for var, desc in tmpl.relevant_vars:
+                if var not in all_vars:
+                    all_vars[var] = desc
+
+        sorted_vars = sorted(all_vars.items())
+
+        lines = [r"\(\begin{aligned}"]
+        for var, desc in sorted_vars:
+            safe_var = var.replace('_', r'\_')
+            safe_desc = desc.replace('_', r'\_')
+            lines.append(rf"\text{{{safe_var}}} &\quad\ldots \text{{{safe_desc}}} \\")
+        lines.append(r"\end{aligned}\)")
+
+        return_sting +="".join(lines)
+
+        return return_sting
+
+    def ngapp_equations(self):
+        return_sting = ""
+
+        return_sting += r"\(\text{\textbf{Equations:}}\\\)"
+
+        eq_lines = []
+        local_symbols = {}
+        for tmpl in self.equation_templates:
+            for var, _ in tmpl.relevant_vars:
+                if var not in local_symbols:
+                    local_symbols[var] = symbols(var)
+
+        for tmpl in self.equation_templates:
+            for lhs_raw, rhs_raw in tmpl.equations_to_add:
+                lhs = sympify(lhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
+                rhs = sympify(rhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
+                name = tmpl.name or "—"
+                eq_lines.append(
+                    rf"\text{{{name.replace('_', ' ')}}} & = {latex(Eq(lhs, rhs))} \\[4pt]"
+                )
+
+        if eq_lines:
+            return_sting += r"\(\begin{aligned}" + "".join(eq_lines) + r"\end{aligned}\)"
+        else:
+            return_sting += r"\(\textit{No templates loaded yet.}\)"
+
+        return return_sting
+
+
     def help(self):
         """Print help text and display available variables & equations in Jupyter."""
         print("Equation Manager Help:")
