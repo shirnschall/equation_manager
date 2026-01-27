@@ -301,7 +301,7 @@ class Equation_Manager:
     def ngapp_vars(self):
         return_sting = ""
 
-        return_sting += r"\(\text{\textbf{Variables:}}\\\\\)"
+        # return_sting += r"\(\text{\textbf{Variables:}}\\\\\)"
 
         all_vars = {}
         for tmpl in self.equation_templates:
@@ -311,16 +311,25 @@ class Equation_Manager:
 
         sorted_vars = sorted(all_vars.items())
 
-        lines = [r"\(\begin{aligned}"]
+        # lines = [r"\(\begin{aligned}"]
+        # for var, desc in sorted_vars:
+        #     safe_var = var.replace('_', r'\_')
+        #     safe_desc = desc.replace('_', r'\_')
+        #     lines.append(rf"\text{{{safe_var}}} &\quad\ldots \text{{{safe_desc}}} \\")
+        # lines.append(r"\end{aligned}\)")
+
+        # return_sting +="".join(lines)
+
+        name_lines = []
+        desc_lines = []
         for var, desc in sorted_vars:
-            safe_var = var.replace('_', r'\_')
-            safe_desc = desc.replace('_', r'\_')
-            lines.append(rf"\text{{{safe_var}}} &\quad\ldots \text{{{safe_desc}}} \\")
-        lines.append(r"\end{aligned}\)")
+            name_lines.append(f"{var}\n")
+            desc_lines.append(f"{desc}\n")
 
-        return_sting +="".join(lines)
+        names = "".join(name_lines)
+        desc = "".join(desc_lines)
 
-        return return_sting
+        return names, desc
 
     def ngapp_equations(self):
         return_sting = ""
@@ -340,7 +349,7 @@ class Equation_Manager:
                 rhs = sympify(rhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
                 name = tmpl.name or "—"
                 eq_lines.append(
-                    rf"\text{{{name.replace('_', ' ')}}} & = {latex(Eq(lhs, rhs))} \\[4pt]"
+                    rf"\text{{{name.replace('_', ' ')}}} & {latex(Eq(lhs, rhs))} \\[4pt]"
                 )
 
         if eq_lines:
