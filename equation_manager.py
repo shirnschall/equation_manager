@@ -14,7 +14,7 @@ templates in separate files (like ``everything_aero.py``).
 
 Features:
 - Variables are indexed (e.g. v1, v2, rho3) to support multiple instances
-- Templates use placeholders ``ii`` and ``jj`` for single/multi-index equations
+- Templates use placeholders ``{{i}}`` and ``{{j}}`` for single/multi-index equations
 - Equations are only added when required input variables are present
 - Solutions are presented with LaTeX formatting in Jupyter environments
 - Fallback solving strategy drops selected equations if the full system is overconstrained
@@ -57,7 +57,7 @@ class Equation_Template:
     """Container for a single equation template used by :class:`Equation_Manager`.
 
     :param equations_to_add: List of (LHS, RHS) string pairs defining the equations.
-                             Placeholders ``ii`` and ``jj`` are replaced with concrete indices.
+                             Placeholders ``{{i}}`` and ``{{j}}`` are replaced with concrete indices.
     :type equations_to_add: list[tuple[str, str]]
 
     :param relevant_vars: List of ``(base_name, description)`` tuples for variables
@@ -74,7 +74,7 @@ class Equation_Template:
     """
 
     def __init__(self, equations_to_add: list, relevant_vars: list, vars_to_check: list, name: str):
-        # TODO: check for ii AND jj to determine multiindex or not
+        # TODO: check for {{i}} AND {{j}} to determine multiindex or not
         self.equations_to_add = equations_to_add
         self.relevant_vars = relevant_vars
         self.vars_to_check = vars_to_check
@@ -212,7 +212,7 @@ class Equation_Manager:
         Templates are only activated when enough indexed instances of required
         variables are present (controlled by ``vars_to_check``).
 
-        :param equations_to_add: list of ``(lhs_str, rhs_str)`` tuples using ``ii``/``jj``
+        :param equations_to_add: list of ``(lhs_str, rhs_str)`` tuples using ``{{i}}``/``{{j}}``
         :param relevant_vars: list of ``(base_name, description)`` tuples
         :param vars_to_check: list of ``([var_names], min_count)`` activation conditions
         :param name: optional template identifier (shown in pretty-print output)
@@ -243,7 +243,7 @@ class Equation_Manager:
                 combined_indices = reduce(lambda x, y: x | y, index_sets, set())
 
                 for eqn in eqt.equations_to_add:
-                    multiindex = "jj" in eqn[0] or "jj" in eqn[1] or not combined_indices
+                    multiindex = "{{j}}" in eqn[0] or "{{j}}" in eqn[1] or not combined_indices
 
                     indices_j = deepcopy(combined_indices) if multiindex else \
                                 [max(combined_indices) + 1] if combined_indices else [1]
@@ -262,8 +262,8 @@ class Equation_Manager:
                                     self._add_vars(eqt.relevant_vars, j)
                                 self._add_vars(eqt.relevant_vars, i)
 
-                                lhs_str = eqn[0].replace("ii", str(i)).replace("jj", str(j))
-                                rhs_str = eqn[1].replace("ii", str(i)).replace("jj", str(j))
+                                lhs_str = eqn[0].replace("{{i}}", str(i)).replace("{{j}}", str(j))
+                                rhs_str = eqn[1].replace("{{i}}", str(i)).replace("{{j}}", str(j))
 
                                 lhs = sympify(lhs_str, locals=self.symbol_db)
                                 rhs = simplify(sympify(rhs_str, locals=self.symbol_db))
@@ -345,8 +345,8 @@ class Equation_Manager:
 
         for tmpl in self.equation_templates:
             for lhs_raw, rhs_raw in tmpl.equations_to_add:
-                lhs = sympify(lhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
-                rhs = sympify(rhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
+                lhs = sympify(lhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
+                rhs = sympify(rhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 name = tmpl.name or "—"
                 eq_lines.append(
                     rf"\text{{{name.replace('_', ' ')}}} & {latex(Eq(lhs, rhs))} \\[4pt]"
@@ -402,8 +402,8 @@ class Equation_Manager:
 
         for tmpl in self.equation_templates:
             for lhs_raw, rhs_raw in tmpl.equations_to_add:
-                lhs = sympify(lhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
-                rhs = sympify(rhs_raw.replace("ii","").replace("jj",""), locals=local_symbols)
+                lhs = sympify(lhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
+                rhs = sympify(rhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 name = tmpl.name or "—"
                 eq_lines.append(
                     rf"\text{{{name.replace('_', ' ')}}} & {latex(Eq(lhs, rhs))} \\\\[4pt]"
