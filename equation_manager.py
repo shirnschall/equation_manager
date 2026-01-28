@@ -212,7 +212,7 @@ class Equation_Manager:
         Templates are only activated when enough indexed instances of required
         variables are present (controlled by ``vars_to_check``).
 
-        :param equations_to_add: list of ``(lhs_str, rhs_str)`` tuples using ``{{i}}``/``{{j}}``
+        :param equations_to_add: list of ``lhs_str=rhs_str`` strings using ``{{i}}``/``{{j}}``
         :param relevant_vars: list of ``(base_name, description)`` tuples
         :param vars_to_check: list of ``([var_names], min_count)`` activation conditions
         :param name: optional template identifier (shown in pretty-print output)
@@ -243,7 +243,8 @@ class Equation_Manager:
                 combined_indices = reduce(lambda x, y: x | y, index_sets, set())
 
                 for eqn in eqt.equations_to_add:
-                    multiindex = "{{j}}" in eqn[0] or "{{j}}" in eqn[1] or not combined_indices
+                    multiindex = "{{j}}" in eqn.split("=")[0] or "{{j}}" in eqn.split("=")[1] or not combined_indices
+                    # print(f"{multiindex}: Processing template equation: {eqn}", flush=True)
 
                     indices_j = deepcopy(combined_indices) if multiindex else \
                                 [max(combined_indices) + 1] if combined_indices else [1]
@@ -260,7 +261,9 @@ class Equation_Manager:
 
                                 if multiindex:
                                     self._add_vars(eqt.relevant_vars, j)
+                                    print(f"Added vars for j={j}: {eqt.relevant_vars}", flush=True)
                                 self._add_vars(eqt.relevant_vars, i)
+                                print(f"Added vars for i={i}: {eqt.relevant_vars}", flush=True)
 
                                 lhs_str = eqn.split("=")[0].replace("{{i}}", str(i)).replace("{{j}}", str(j))
                                 rhs_str = eqn.split("=")[1].replace("{{i}}", str(i)).replace("{{j}}", str(j))
@@ -293,7 +296,7 @@ class Equation_Manager:
 
         for eq in input_equations:
             self.input_eqs.append(eq)
-            for x in eq:
+            for x in eq.split('='):
                 s_ind = 0
                 while m := re.search(pattern, str(x)[s_ind:]):
                     s_ind += m.end()
@@ -417,7 +420,7 @@ class Equation_Manager:
         else:
             display(Math(r"\textit{No templates loaded yet.}"))
 
-    def _solve(self, assumptions: dict, looking_for: list, max_drop_cnt: int = 3):
+    def _solve(self, assumptions: list, looking_for: list, max_drop_cnt: int = 3):
         """Solve the system — fall back to dropping assumption-related equations if needed.
 
         :param assumptions: fixed values that may overconstrain the system
@@ -426,6 +429,16 @@ class Equation_Manager:
         :return: (solutions list, used equations, used equation names)
         """
         vars_to_solve = list(self.symbol_db.values())
+
+        def extract_symbols(eq_str):
+            pattern = r'\b[A-Za-z][A-Za-z0-9_]*\b'
+            return set(re.findall(pattern, eq_str))
+        
+        assumption_set = set()
+        for assump in assumptions:
+            assumption_set.update(extract_symbols(assump))
+
+        print(f"assumption symbols: {assumption_set}")
 
         solution = solve(
             self.equations,
@@ -440,7 +453,7 @@ class Equation_Manager:
         # Fallback: try dropping equations containing assumption variables
         assumption_eq_indices = [
             i for i, eq in enumerate(self.equations)
-            if any(str(self.symbol_db.get(k, "")) in str(eq) for k in assumptions)
+            if any(str(self.symbol_db.get(k, "")) in str(eq) for k in assumption_set)
         ]
 
         for keep_looking in [False, True]:
@@ -490,6 +503,10 @@ class Equation_Manager:
         self.assemble_equations()
 
         print("Solving... ", end="")
+        print(f"self.equations: {self.equations}")
+        print(f"self.equation_names: {self.equation_names}")
+        print(f"assumptions: {assumptions}")
+        print(f"looking_for: {looking_for}")
 
         # self._pretty_print_eqns("Matching Equations", self.equation_names, self.equations)
 
