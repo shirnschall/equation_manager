@@ -56,9 +56,9 @@ else:
 class Equation_Template:
     """Container for a single equation template used by :class:`Equation_Manager`.
 
-    :param equations_to_add: List of (LHS, RHS) string pairs defining the equations.
-                             Placeholders ``{{i}}`` and ``{{j}}`` are replaced with concrete indices.
-    :type equations_to_add: list[tuple[str, str]]
+    :param equations_to_add: List of equation strings defining the equations.
+                             Placeholders ``{{i}}`` and ``{{j}}`` are replaced with concrete indices. Lhs and rhs are separated by a single '='.
+    :type equations_to_add: list[str]
 
     :param relevant_vars: List of ``(base_name, description)`` tuples for variables
                           involved in these equations.
@@ -262,8 +262,8 @@ class Equation_Manager:
                                     self._add_vars(eqt.relevant_vars, j)
                                 self._add_vars(eqt.relevant_vars, i)
 
-                                lhs_str = eqn[0].replace("{{i}}", str(i)).replace("{{j}}", str(j))
-                                rhs_str = eqn[1].replace("{{i}}", str(i)).replace("{{j}}", str(j))
+                                lhs_str = eqn.split("=")[0].replace("{{i}}", str(i)).replace("{{j}}", str(j))
+                                rhs_str = eqn.split("=")[1].replace("{{i}}", str(i)).replace("{{j}}", str(j))
 
                                 lhs = sympify(lhs_str, locals=self.symbol_db)
                                 rhs = simplify(sympify(rhs_str, locals=self.symbol_db))
@@ -277,7 +277,8 @@ class Equation_Manager:
                 break
 
         # equations from input
-        for lhs, rhs in self.input_eqs:
+        for eq in self.input_eqs:
+            lhs, rhs = eq.split('=')
             self._add_equation_unique(
                     Eq(sympify(lhs, locals=self.symbol_db), sympify(rhs, locals=self.symbol_db)))
         # print(f"equations from input: {self.equations}")
@@ -344,7 +345,8 @@ class Equation_Manager:
                     local_symbols[var] = symbols(var)
 
         for tmpl in self.equation_templates:
-            for lhs_raw, rhs_raw in tmpl.equations_to_add:
+            for eq in tmpl.equations_to_add:
+                lhs_raw, rhs_raw = eq.split('=')
                 lhs = sympify(lhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 rhs = sympify(rhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 name = tmpl.name or "—"
@@ -401,7 +403,8 @@ class Equation_Manager:
                     local_symbols[var] = symbols(var)
 
         for tmpl in self.equation_templates:
-            for lhs_raw, rhs_raw in tmpl.equations_to_add:
+            for eq in tmpl.equations_to_add:
+                lhs_raw, rhs_raw = eq.split('=')
                 lhs = sympify(lhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 rhs = sympify(rhs_raw.replace("{{i}}","").replace("{{j}}",""), locals=local_symbols)
                 name = tmpl.name or "—"
