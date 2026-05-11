@@ -20,7 +20,7 @@ Features:
 - Fallback solving strategy drops selected equations if the full system is overconstrained
 """
 
-from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
+# from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
 # import numpy as np
 from copy import deepcopy
 from functools import reduce
