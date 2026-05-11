@@ -28,6 +28,10 @@ import re
 from collections import defaultdict
 from itertools import combinations
 
+def _load_sympy():
+    global symbols, Eq, solve, exp, S, latex, simplify, sympify
+    from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
+
 def in_jupyter():
     try:
         # Most common & reliable way (works in classic notebook, JupyterLab, Colab, VSCode notebooks...)
@@ -52,6 +56,8 @@ if in_jupyter():
     print("Jupyter environment detected → rich display & plotly imported")
 else:
     print("Not in Jupyter → skipping IPython & plotly imports")
+
+_load_sympy() #lazy load sympy
 
 class Equation_Template:
     """Container for a single equation template used by :class:`Equation_Manager`.
