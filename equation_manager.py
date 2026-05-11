@@ -30,8 +30,10 @@ from itertools import combinations
 global symbols, Eq, solve, exp, S, latex, simplify, sympify
 
 def _load_sympy():
+    print("Loading sympy... ", flush=True)
     global symbols, Eq, solve, exp, S, latex, simplify, sympify
     from sympy import symbols, Eq, solve, exp, S, latex, simplify, sympify
+    print("Done.", flush=True)
 
 def in_jupyter():
     try:
@@ -233,7 +235,6 @@ class Equation_Manager:
         Continues until no new equations are added (fixed-point iteration).
         """
 
-        
 
         #equations from templates
         while True:
@@ -312,7 +313,6 @@ class Equation_Manager:
         return_sting = ""
 
         # return_sting += r"\(\text{\textbf{Variables:}}\\\\\)"
-
         all_vars = {}
         for tmpl in self.equation_templates:
             for var, desc in tmpl.relevant_vars:
@@ -345,7 +345,6 @@ class Equation_Manager:
         return_sting = ""
 
         return_sting += r"\(\text{\textbf{Equations:}}\\\)"
-
         eq_lines = []
         local_symbols = {}
         for tmpl in self.equation_templates:
