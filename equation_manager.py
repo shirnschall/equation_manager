@@ -27,6 +27,7 @@ from functools import reduce
 import re
 from collections import defaultdict
 from itertools import combinations
+global symbols, Eq, solve, exp, S, latex, simplify, sympify
 
 def _load_sympy():
     global symbols, Eq, solve, exp, S, latex, simplify, sympify
@@ -57,7 +58,6 @@ if in_jupyter():
 else:
     print("Not in Jupyter → skipping IPython & plotly imports")
 
-_load_sympy() #lazy load sympy
 
 class Equation_Template:
     """Container for a single equation template used by :class:`Equation_Manager`.
